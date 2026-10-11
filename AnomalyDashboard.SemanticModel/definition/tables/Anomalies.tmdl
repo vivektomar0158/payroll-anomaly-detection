@@ -1,0 +1,41 @@
+table Anomalies
+	lineageTag: a5394d19-cc97-4b03-92fe-568ece88c385
+
+	measure 'Total Anomalies' = COUNTROWS(Anomalies)
+		formatString: #,0
+		lineageTag: 53db5b23-2d12-49b5-8301-58f192ead2f1
+
+	measure 'Distinct Employees Flagged' = DISTINCTCOUNT(Anomalies[employee_id])
+		formatString: #,0
+		lineageTag: 25cf9096-017b-4b95-8add-d06a650f2e75
+
+	column employee_id
+		dataType: string
+		lineageTag: 3f77163b-1a29-4778-9714-2c95b7be1c5e
+		sourceColumn: employee_id
+
+	column pay_period
+		dataType: string
+		lineageTag: dd37bb3f-32c7-48a0-987b-886f58903922
+		sourceColumn: pay_period
+
+	column rule
+		dataType: string
+		lineageTag: e9afc373-3fd5-4e6b-8e75-b7f44a060ad1
+		sourceColumn: rule
+
+	column detail
+		dataType: string
+		lineageTag: 7d198a92-9404-45cb-9e7c-20afe92575ab
+		sourceColumn: detail
+
+	partition Anomalies = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\vivek\Desktop\java\claude\da\data-analyst\payroll-anomaly-detection\data\anomalies.csv"),[Delimiter=",", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    ChangedType = Table.TransformColumnTypes(PromotedHeaders,{{"employee_id", type text},{"pay_period", type text},{"rule", type text},{"detail", type text}})
+				in
+				    ChangedType
+
